@@ -4,3 +4,4 @@
 
 # FVM Version Cache
 .fvm/
+libs/*
