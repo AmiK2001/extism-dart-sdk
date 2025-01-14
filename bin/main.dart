@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:dart_sdk/src/manifest/manifest_entity.dart';
@@ -27,6 +28,7 @@ void main() {
 
   // Create plugin
   final plugin = Plugin(
+    dynamicLibrary: DynamicLibrary.open("libs/extism.dll"),
     withWasi: true,
     manifest: manifest,
   );
