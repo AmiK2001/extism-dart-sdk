@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:dart_sdk/src/plugin.dart';
+import 'package:dart_sdk/src/api/plugin.dart';
 
 void main() {
   const wasmPath = "test/resources/code.wasm";
-  const functionName = "factorial";
-  const input = 5;
+  const functionName = "count_vowels";
+  const input = "Hello, world";
 
   // Load WASM file
   final wasmData = File(wasmPath);
@@ -22,7 +22,7 @@ void main() {
   print(
     plugin.call(
       functionName,
-      [input],
+      input.runes.toList(),
     ),
   );
 }

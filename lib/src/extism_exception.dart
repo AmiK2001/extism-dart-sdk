@@ -1,1 +1,0 @@
-class ExtismException implements Exception {}
