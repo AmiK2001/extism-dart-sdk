@@ -1,5 +1,6 @@
 library extism;
 
-export 'src/extism_bindings.dart';
-export 'src/generated_bindings.dart';
-export 'src/utils/extism_utils.dart';
+export 'src/plugin.dart';
+export 'src/lib_extism.dart';
+export 'src/utils.dart';
+export 'src/manifest.dart';

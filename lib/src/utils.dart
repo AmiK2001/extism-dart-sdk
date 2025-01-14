@@ -1,12 +1,19 @@
 import 'dart:ffi';
 
 import 'package:dart_sdk/extism.dart';
+import 'package:ffi/ffi.dart';
 
 extension Uint8ListExtensions on List<int> {
   Pointer<Uint8> toNativeUint8List(Allocator allocator) {
     final ptr = allocator<Uint8>(length);
     ptr.asTypedList(length).setAll(0, this);
     return ptr;
+  }
+}
+
+extension CharPointerExtension on Pointer<Char> {
+  String toDartString() {
+    return cast<Utf8>().toDartString();
   }
 }
 

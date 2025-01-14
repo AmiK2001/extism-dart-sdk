@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:dart_sdk/extism.dart';
+import 'package:dart_sdk/src/extism_exception.dart';
 import 'package:ffi/ffi.dart';
 
 DynamicLibrary loadExtismLibrary() {
@@ -25,7 +26,7 @@ String _findLibraryPath() {
   }
 }
 
-final _extismLib = LibExtism(loadExtismLibrary());
+final extism = LibExtism(loadExtismLibrary());
 
 String _findAndroidLibrary() {
   // Detect the CPU architecture of the Android device
@@ -46,8 +47,7 @@ String _findAndroidLibrary() {
 }
 
 // Exposed FFI Functions
-String extismVersion() =>
-    _extismLib.extism_version().cast<Utf8>().toDartString();
+String extismVersion() => extism.extism_version().toDartString();
 
 Pointer<ExtismPlugin> extismPluginNew(
   Allocator allocator,
@@ -59,7 +59,7 @@ Pointer<ExtismPlugin> extismPluginNew(
   final functionsPointer = functions.toNativePointerList(allocator);
   final errmsgPointer = allocator<Pointer<Char>>();
 
-  final plugin = _extismLib.extism_plugin_new(
+  final plugin = extism.extism_plugin_new(
     wasmPointer,
     wasm.length,
     functionsPointer,
@@ -72,10 +72,9 @@ Pointer<ExtismPlugin> extismPluginNew(
   allocator.free(functionsPointer);
 
   if (errmsgPointer.value != nullptr) {
-    final error = errmsgPointer.cast<Utf8>().toDartString();
+    final error = errmsgPointer.value.toDartString();
     allocator.free(errmsgPointer.value);
-    allocator.free(errmsgPointer);
-    throw Exception('Extism Plugin Error: $error');
+    throw ExtismException(error);
   }
 
   allocator.free(errmsgPointer);
@@ -83,7 +82,7 @@ Pointer<ExtismPlugin> extismPluginNew(
 }
 
 void extismPluginFree(Pointer<ExtismPlugin> plugin) {
-  _extismLib.extism_plugin_free(plugin);
+  extism.extism_plugin_free(plugin);
 }
 
 int extismPluginCall(
@@ -95,8 +94,12 @@ int extismPluginCall(
   final funcNamePointer = funcName.toNativeUtf8(allocator: allocator);
   final dataPointer = data.toNativeUint8List(allocator);
 
-  final result = _extismLib.extism_plugin_call(
-      plugin, funcNamePointer.cast(), dataPointer, data.length);
+  final result = extism.extism_plugin_call(
+    plugin,
+    funcNamePointer.cast(),
+    dataPointer,
+    data.length,
+  );
 
   allocator.free(funcNamePointer);
   allocator.free(dataPointer);
@@ -107,7 +110,7 @@ int extismPluginCall(
 Pointer<Uint8> extismPluginOutputData(
   Pointer<ExtismPlugin> plugin,
 ) {
-  final result = _extismLib.extism_plugin_output_data(plugin);
+  final result = extism.extism_plugin_output_data(plugin);
 
   return result;
 }
@@ -115,7 +118,7 @@ Pointer<Uint8> extismPluginOutputData(
 int extismPluginOutputLength(
   Pointer<ExtismPlugin> plugin,
 ) {
-  final result = _extismLib.extism_plugin_output_length(plugin);
+  final result = extism.extism_plugin_output_length(plugin);
 
   return result;
 }
@@ -123,7 +126,50 @@ int extismPluginOutputLength(
 Pointer<Char> extismPluginError(
   Pointer<ExtismPlugin> plugin,
 ) {
-  final result = _extismLib.extism_plugin_error(plugin);
+  final result = extism.extism_plugin_error(plugin);
 
   return result;
+}
+
+class Plugin {
+  Plugin({
+    required bool withWasi,
+    required List<int> wasm,
+  }) {
+    _pluginPointer = extismPluginNew(_allocator, wasm, [], withWasi);
+  }
+
+  final _allocator = calloc;
+  late final Pointer<ExtismPlugin> _pluginPointer;
+
+  void dispose() {
+    extismPluginFree(_pluginPointer);
+  }
+
+  List<int> call(String functionName, List<int> inputData) {
+    try {
+      // Call function
+      final resultCode = extismPluginCall(
+        _allocator,
+        _pluginPointer,
+        functionName,
+        inputData,
+      );
+
+      // Check result
+      if (resultCode != 0) {
+        final errorPointer = extismPluginError(_pluginPointer);
+        final errorMessage = errorPointer.toDartString();
+        throw ExtismException(errorMessage);
+      }
+
+      // Retrieve output
+      final outputSize = extismPluginOutputLength(_pluginPointer);
+      final outputPointer = extismPluginOutputData(_pluginPointer);
+
+      return outputPointer.asTypedList(outputSize);
+    } on Object catch (e) {
+      throw ExtismException(e.toString());
+    }
+  }
 }

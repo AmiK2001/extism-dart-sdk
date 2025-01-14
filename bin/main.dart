@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_sdk/src/api/plugin.dart';
+import 'package:dart_sdk/extism.dart';
 
 void main() {
   const wasmPath = "test/resources/code.wasm";
@@ -15,14 +16,33 @@ void main() {
 
   final wasmBytes = wasmData.readAsBytesSync();
 
-  final plugin = Plugin(withWasi: true, wasm: wasmBytes);
+  // Define manifest
+  final manifest = Manifest(
+    wasm: [
+      Wasm(
+        data: base64Encode(wasmBytes),
+        name: "main",
+      ),
+    ],
+    timeoutMs: 5000,
+  );
+
+  final manifestInBytes = jsonEncode(manifest).runes.toList();
+
+  // Create plugin
+  final plugin = Plugin(
+    withWasi: true,
+    wasm: manifestInBytes,
+  );
 
   print("Executing $functionName from $wasmPath with input '$input'\n");
 
-  print(
+  final output = String.fromCharCodes(
     plugin.call(
       functionName,
       input.runes.toList(),
     ),
   );
+
+  print(output);
 }
