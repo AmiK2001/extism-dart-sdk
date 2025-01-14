@@ -1,6 +1,50 @@
+import 'dart:ffi';
+
+import 'package:dart_sdk/extism.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+import 'package:flutter/services.dart' show Uint8List, rootBundle;
+
+Future<Uint8List> loadCode() async {
+  return Uint8List.sublistView((await rootBundle.load('assets/code.wasm')));
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  const functionName = "count_vowels";
+  const input = "Hello, world";
+
+  final wasm = await loadCode();
+
+  // Define manifest
+  final manifest = ManifestEntity(
+    wasm: [
+      WasmSource.fromBytes(
+        data: wasm,
+        name: "main",
+      ),
+    ],
+  );
+
+  // Create plugin
+  final plugin = Plugin(
+    dynamicLibrary: DynamicLibrary.open("libextism.so"),
+    withWasi: true,
+    manifest: manifest,
+  );
+
+  print("Executing $functionName with input '$input'\n");
+
+  final output = String.fromCharCodes(
+    plugin.call(
+      functionName,
+      input.runes.toList(),
+    ),
+  );
+
+  print(output);
+
   runApp(const MyApp());
 }
 
