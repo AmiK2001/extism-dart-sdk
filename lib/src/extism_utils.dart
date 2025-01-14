@@ -10,7 +10,7 @@ extension Uint8ListExtensions on List<int> {
   }
 }
 
-extension PointerListExtensions on List<Pointer<ExtismFunction>> {
+extension ExtismFunctionPointerListExtensions on List<Pointer<ExtismFunction>> {
   Pointer<Pointer<ExtismFunction>> toNativePointerList(Allocator allocator) {
     final ptr = allocator<Pointer<ExtismFunction>>(length);
     for (var i = 0; i < length; i++) {

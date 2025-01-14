@@ -25,7 +25,7 @@ String _findLibraryPath() {
   }
 }
 
-final _extismLib = NativeLibrary(loadExtismLibrary());
+final _extismLib = LibExtism(loadExtismLibrary());
 
 String _findAndroidLibrary() {
   // Detect the CPU architecture of the Android device
