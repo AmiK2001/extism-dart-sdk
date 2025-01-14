@@ -134,9 +134,10 @@ Pointer<Char> extismPluginError(
 class Plugin {
   Plugin({
     required bool withWasi,
-    required List<int> wasm,
+    required ManifestEntity manifest,
   }) {
-    _pluginPointer = extismPluginNew(_allocator, wasm, [], withWasi);
+    final bytes = manifest.bytes();
+    _pluginPointer = extismPluginNew(_allocator, bytes, [], withWasi);
   }
 
   final _allocator = calloc;

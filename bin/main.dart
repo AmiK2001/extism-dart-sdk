@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_sdk/extism.dart';
+import 'package:dart_sdk/src/manifest/manifest_entity.dart';
+import 'package:dart_sdk/src/plugin.dart';
+import 'package:dart_sdk/src/wasm/wasm_source.dart';
 
 void main() {
   const wasmPath = "test/resources/code.wasm";
@@ -14,25 +15,20 @@ void main() {
     throw Exception('WASM file not found at path: $wasmPath');
   }
 
-  final wasmBytes = wasmData.readAsBytesSync();
-
   // Define manifest
-  final manifest = Manifest(
+  final manifest = ManifestEntity(
     wasm: [
-      Wasm(
-        data: base64Encode(wasmBytes),
+      WasmSource.fromPath(
+        path: wasmPath,
         name: "main",
       ),
     ],
-    timeoutMs: 5000,
   );
-
-  final manifestInBytes = jsonEncode(manifest).runes.toList();
 
   // Create plugin
   final plugin = Plugin(
     withWasi: true,
-    wasm: manifestInBytes,
+    manifest: manifest,
   );
 
   print("Executing $functionName from $wasmPath with input '$input'\n");
