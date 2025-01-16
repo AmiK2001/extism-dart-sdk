@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:dart_sdk/extism.dart';
 import 'package:flutter/material.dart';
 
@@ -29,19 +27,18 @@ void main() async {
 
   // Create plugin
   final plugin = Plugin(
-    dynamicLibrary: DynamicLibrary.open("libextism.so"),
     withWasi: true,
     manifest: manifest,
   );
 
   print("Executing $functionName with input '$input'\n");
 
-  final output = String.fromCharCodes(
-    plugin.call(
-      functionName,
-      input.runes.toList(),
-    ),
-  );
+  final output = plugin
+      .call(
+        functionName,
+        input.runes.toList(),
+      )
+      .toDartString();
 
   print(output);
 

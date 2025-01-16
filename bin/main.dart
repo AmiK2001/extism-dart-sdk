@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:dart_sdk/extism.dart';
+import 'package:dart_sdk/src/utils.dart';
 
 void main() {
   const wasmPath = "test/resources/code.wasm";
@@ -33,12 +34,10 @@ void main() {
 
   print("Executing $functionName from $wasmPath with input '$input'\n");
 
-  final output = String.fromCharCodes(
-    plugin.call(
-      functionName,
-      input.runes.toList(),
-    ),
+  final output = plugin.call(
+    functionName,
+    input.runes.toList(),
   );
 
-  print(output);
+  print(output.toDartString());
 }

@@ -19,6 +19,10 @@ extension Uint8ListExtensions on List<int> {
 
     return pointer;
   }
+
+  String toDartString() {
+    return String.fromCharCodes(this);
+  }
 }
 
 extension StringExtension on String {

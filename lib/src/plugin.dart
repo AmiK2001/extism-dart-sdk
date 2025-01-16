@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:dart_sdk/src/extism_exception.dart';
 import 'package:dart_sdk/src/extism_ffi.dart';
@@ -6,16 +7,35 @@ import 'package:dart_sdk/src/lib_extism.dart';
 import 'package:dart_sdk/src/manifest/manifest_entity.dart';
 import 'package:ffi/ffi.dart';
 
+String _resolveLibraryFilename() {
+  if (Platform.isWindows) {
+    return "extism.dll";
+  } else if (Platform.isMacOS | Platform.isIOS) {
+    return "libextism.dylib";
+  } else if (Platform.isLinux || Platform.isAndroid) {
+    return "libextism.so";
+  } else {
+    throw UnimplementedError("Unsupported system ${Platform.operatingSystem}");
+  }
+}
+
 class Plugin {
-  final DynamicLibrary dynamicLibrary;
+  late final DynamicLibrary _dynamicLibrary;
   late final ExtismFFI _extism;
 
   Plugin({
     required bool withWasi,
     required ManifestEntity manifest,
-    required this.dynamicLibrary,
+    DynamicLibrary? dynamicLibrary,
   }) {
-    _extism = ExtismFFI(dynamicLibrary: dynamicLibrary);
+    _dynamicLibrary = dynamicLibrary ??
+        DynamicLibrary.open(
+          _resolveLibraryFilename(),
+        );
+    _extism = ExtismFFI(
+      dynamicLibrary: _dynamicLibrary,
+    );
+
     final bytes = manifest.bytes();
     _pluginPointer = _extism.extismPluginNew(_allocator, bytes, [], withWasi);
   }
@@ -29,7 +49,6 @@ class Plugin {
 
   List<int> call(String functionName, List<int> inputData) {
     try {
-      // Call function
       final resultCode = _extism.extismPluginCall(
         _allocator,
         _pluginPointer,
@@ -37,13 +56,11 @@ class Plugin {
         inputData,
       );
 
-      // Check result
       if (resultCode != 0) {
         final errorMessage = _extism.extismPluginError(_pluginPointer);
         throw ExtismException(errorMessage);
       }
 
-      // Retrieve output
       final outputSize = _extism.extismPluginOutputLength(_pluginPointer);
       final outputPointer = _extism.extismPluginOutputData(_pluginPointer);
 
