@@ -1,6 +1,6 @@
 import 'dart:ffi';
 
-import 'package:dart_sdk/extism.dart';
+import 'package:dart_sdk/src/lib_extism.dart';
 import 'package:ffi/ffi.dart';
 
 extension Uint8ListExtensions on List<int> {
@@ -8,6 +8,22 @@ extension Uint8ListExtensions on List<int> {
     final ptr = allocator<Uint8>(length);
     ptr.asTypedList(length).setAll(0, this);
     return ptr;
+  }
+
+  Pointer<Uint32> toNativeUint32() {
+    final Pointer<Uint32> pointer = malloc<Uint32>(length);
+
+    for (var i = 0; i < length; i++) {
+      pointer[i] = this[i];
+    }
+
+    return pointer;
+  }
+}
+
+extension StringExtension on String {
+  Pointer<Char> toChar() {
+    return toNativeUtf8().cast();
   }
 }
 

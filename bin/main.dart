@@ -1,9 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:dart_sdk/src/manifest/manifest_entity.dart';
-import 'package:dart_sdk/src/plugin.dart';
-import 'package:dart_sdk/src/wasm/wasm_source.dart';
+import 'package:dart_sdk/extism.dart';
 
 void main() {
   const wasmPath = "test/resources/code.wasm";
