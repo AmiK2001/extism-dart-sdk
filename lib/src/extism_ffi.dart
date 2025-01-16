@@ -33,30 +33,31 @@ class ExtismFFI {
     List<Pointer<ExtismFunction>> functions,
     bool withWasi,
   ) {
-    final wasmPointer = wasm.toNativeUint8List(allocator);
-    final functionsPointer = functions.toNativePointerList(allocator);
-    final errmsgPointer = allocator<Pointer<Char>>();
+    return withZoneArena(
+      () {
+        final wasmPointer = wasm.toNativeUint8List(allocator);
+        final functionsPointer = functions.toNativePointerList(allocator);
+        final errmsgPointer = allocator<Pointer<Char>>();
 
-    final plugin = _libExtism.extism_plugin_new(
-      wasmPointer,
-      wasm.length,
-      functionsPointer,
-      functions.length,
-      withWasi,
-      errmsgPointer,
+        final plugin = _libExtism.extism_plugin_new(
+          wasmPointer,
+          wasm.length,
+          functionsPointer,
+          functions.length,
+          withWasi,
+          errmsgPointer,
+        );
+
+        if (errmsgPointer.value != nullptr) {
+          final error = errmsgPointer.value.toDartString();
+
+          throw ExtismException(error);
+        }
+
+        return plugin;
+      },
+      allocator,
     );
-
-    allocator.free(wasmPointer);
-    allocator.free(functionsPointer);
-
-    if (errmsgPointer.value != nullptr) {
-      final error = errmsgPointer.value.toDartString();
-      allocator.free(errmsgPointer.value);
-      throw ExtismException(error);
-    }
-
-    allocator.free(errmsgPointer);
-    return plugin;
   }
 
   /// Free `ExtismPlugin`
@@ -75,20 +76,20 @@ class ExtismFFI {
     String funcName,
     List<int> data,
   ) {
-    final funcNamePointer = funcName.toNativeUtf8(allocator: allocator);
-    final dataPointer = data.toNativeUint8List(allocator);
+    return withZoneArena(
+      () {
+        final funcNamePointer = funcName.toNativeUtf8(allocator: allocator);
+        final dataPointer = data.toNativeUint8List(allocator);
 
-    final result = _libExtism.extism_plugin_call(
-      plugin,
-      funcNamePointer.cast(),
-      dataPointer,
-      data.length,
+        return _libExtism.extism_plugin_call(
+          plugin,
+          funcNamePointer.cast(),
+          dataPointer,
+          data.length,
+        );
+      },
+      allocator,
     );
-
-    allocator.free(funcNamePointer);
-    allocator.free(dataPointer);
-
-    return result;
   }
 
   /// Get a pointer to the output data
