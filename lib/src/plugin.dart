@@ -93,7 +93,7 @@ class Plugin {
         final errorMsgPtr = errorMsgPtrOut.value;
         String? msg;
         if (errorMsgPtr != nullptr) {
-          msg = errorMsgPtr.toDartString();
+          msg = errorMsgPtr.cast<Utf8>().toDartString();
         }
 
         throw ExtismException(msg ?? "Unknown error during plugin creation");
@@ -116,7 +116,7 @@ class Plugin {
         final errorMsgPtr = errorMsgPtrOut.value;
         String? msg;
         if (errorMsgPtr != nullptr) {
-          msg = errorMsgPtr.toDartString();
+          msg = errorMsgPtr.cast<Utf8>().toDartString();
         }
 
         throw ExtismException(
@@ -128,13 +128,13 @@ class Plugin {
   }
 
   /// Create a plugin from a Manifest.
-  Plugin.initWithManifest(
-    ManifestEntity manifest,
-    List<HostFunction> functions,
-    bool withWasi,
-  ) : this(
+  Plugin.initWithManifest({
+    required ManifestEntity manifest,
+    List<HostFunction>? functions,
+    required bool withWasi,
+  }) : this(
           manifest,
-          functions,
+          functions ?? [],
           PluginInitializationOptions(withWasi: withWasi),
         );
 
@@ -166,7 +166,7 @@ class Plugin {
         final errorMsgPtr = errorMsgPtrOut.value;
         String? msg;
         if (errorMsgPtr != nullptr) {
-          msg = errorMsgPtr.toDartString();
+          msg = errorMsgPtr.cast<Utf8>().toDartString();
         }
 
         throw ExtismException(
@@ -279,7 +279,7 @@ class Plugin {
     if (ptr == nullptr) {
       return null;
     }
-    return ptr.toDartString();
+    return ptr.cast<Utf8>().toDartString();
   }
 
   /// Frees all resources held by this Plugin.
@@ -312,7 +312,7 @@ class Plugin {
 
   /// Get Extism Runtime version.
   static String get extismVersion {
-    return extism.extism_version().toDartString();
+    return extism.extism_version().cast<Utf8>().toDartString();
   }
 
   /// Set log file and level
@@ -415,7 +415,7 @@ class CompiledPlugin {
         final errorMsgPtr = errorMsgPtrOut.value;
         String? msg;
         if (errorMsgPtr != nullptr) {
-          msg = errorMsgPtr.toDartString();
+          msg = errorMsgPtr.cast<Utf8>().toDartString();
         }
         throw Exception(msg ?? "Unknown error during plugin compilation");
       }

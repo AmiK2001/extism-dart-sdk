@@ -36,12 +36,10 @@ void main() async {
 
   print("Executing $functionName with input '$input'\n");
 
-  final output = plugin
-      .call(
-        functionName,
-        input.runes.toList(),
-      )
-      .toDartString();
+  final output = plugin.callString(
+    functionName,
+    input,
+  );
 
   print(output);
 
