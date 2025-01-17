@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dart_sdk/extism.dart';
 import 'package:dart_sdk/src/extism_exception.dart';
@@ -8,6 +9,7 @@ import 'package:dart_sdk/src/host_function.dart';
 import 'package:dart_sdk/src/lib_extism.dart';
 import 'package:dart_sdk/src/log_level.dart';
 import 'package:ffi/ffi.dart';
+import 'package:uuid/uuid.dart';
 
 // Define a global variable to hold the loaded dynamic library
 DynamicLibrary? _dylib;
@@ -94,7 +96,7 @@ class Plugin {
           msg = errorMsgPtr.toDartString();
         }
 
-        throw Exception(msg ?? "Unknown error during plugin creation");
+        throw ExtismException(msg ?? "Unknown error during plugin creation");
       }
 
       _cancelHandle = extism.extism_plugin_cancel_handle(_nativeHandle);
@@ -117,7 +119,8 @@ class Plugin {
           msg = errorMsgPtr.toDartString();
         }
 
-        throw Exception(msg ?? "Unknown error during plugin instantiation");
+        throw ExtismException(
+            msg ?? "Unknown error during plugin instantiation");
       }
 
       _cancelHandle = extism.extism_plugin_cancel_handle(_nativeHandle);
@@ -166,7 +169,7 @@ class Plugin {
           msg = errorMsgPtr.toDartString();
         }
 
-        throw Exception(
+        throw ExtismException(
             msg ?? "Unknown error during plugin creation from bytes");
       }
 
@@ -175,11 +178,14 @@ class Plugin {
   }
 
   /// Get the plugin's ID.
-  /// Returns a 16-byte array representing the plugin ID.
-  List<int> get id {
+  /// Returns a Uuid representing the plugin ID.
+  UuidValue get id {
     _checkNotDisposed();
     final idPtr = extism.extism_plugin_id(_nativeHandle);
-    return List.generate(16, (index) => idPtr[index]);
+    final byteList =
+        Uint8List.fromList(List.generate(16, (index) => idPtr[index]));
+
+    return UuidValue.fromByteList(byteList);
   }
 
   /// Reset the Extism runtime.
