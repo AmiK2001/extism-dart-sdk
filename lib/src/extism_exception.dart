@@ -4,7 +4,5 @@ class ExtismException implements Exception {
   ExtismException(this.message);
 
   @override
-  String toString() {
-    return "ExtismException(message: $message)";
-  }
+  String toString() => "ExtismException: $message";
 }

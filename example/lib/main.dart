@@ -27,8 +27,11 @@ void main() async {
 
   // Create plugin
   final plugin = Plugin(
-    withWasi: true,
-    manifest: manifest,
+    manifest,
+    [],
+    PluginInitializationOptions(
+      withWasi: true,
+    ),
   );
 
   print("Executing $functionName with input '$input'\n");

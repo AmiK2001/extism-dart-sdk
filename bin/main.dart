@@ -29,9 +29,10 @@ void main() {
   );
 
   // Create plugin
-  final plugin = Plugin(
-    withWasi: true,
-    manifest: manifest,
+  final plugin = Plugin.fromBytes(
+    wasmData.readAsBytesSync(),
+    [],
+    false,
   );
 
   print("Executing $functionName from $wasmPath with input '$input'\n");

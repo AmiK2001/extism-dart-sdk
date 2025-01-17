@@ -1,6 +1,6 @@
 import 'dart:ffi';
+import 'package:dart_sdk/extism.dart';
 import 'package:dart_sdk/src/current_plugin.dart';
-import 'package:dart_sdk/src/extism_ffi.dart';
 import 'package:dart_sdk/src/lib_extism.dart';
 import 'package:ffi/ffi.dart';
 
@@ -33,38 +33,36 @@ class HostFunction {
   }
 
   Pointer<ExtismFunction> _createNativeHandle() {
-    final name = functionName.toNativeUtf8();
-    final inputs = calloc<Int32>(inputTypes.length);
-    final outputs = calloc<Int32>(outputTypes.length);
+    return withZoneArena(() {
+      final name = functionName.toNativeUtf8();
+      final inputs = calloc<Int32>(inputTypes.length);
+      final outputs = calloc<Int32>(outputTypes.length);
 
-    for (var i = 0; i < inputTypes.length; i++) {
-      inputs[i] = inputTypes[i].value;
-    }
-    for (var i = 0; i < outputTypes.length; i++) {
-      outputs[i] = outputTypes[i].value;
-    }
+      for (var i = 0; i < inputTypes.length; i++) {
+        inputs[i] = inputTypes[i].value;
+      }
+      for (var i = 0; i < outputTypes.length; i++) {
+        outputs[i] = outputTypes[i].value;
+      }
 
-    final ExtismFunctionType callback =
-        Pointer.fromFunction(callbackTrampoline);
+      final ExtismFunctionType callback =
+          Pointer.fromFunction(callbackTrampoline);
 
-    _userDataPtr = storeUserData(userData);
+      _userDataPtr = storeUserData(userData);
 
-    final handle = extism.extism_function_new(
-      name.cast(),
-      inputs.cast(),
-      inputTypes.length,
-      outputs.cast(),
-      outputTypes.length,
-      callback,
-      _userDataPtr,
-      nullptr,
-    );
+      final handle = extism.extism_function_new(
+        name.cast(),
+        inputs.cast(),
+        inputTypes.length,
+        outputs.cast(),
+        outputTypes.length,
+        callback,
+        _userDataPtr,
+        nullptr,
+      );
 
-    calloc.free(name);
-    calloc.free(inputs);
-    calloc.free(outputs);
-
-    return handle;
+      return handle;
+    });
   }
 
   static Pointer<Void> _userDataPtr = nullptr;
@@ -97,11 +95,11 @@ class HostFunction {
       final plugin = CurrentPlugin(pluginPtr, data);
       final inputs = <ExtismVal>[];
       for (var i = 0; i < nInputs; i++) {
-        inputs.add(inputsPtr.elementAt(i).ref);
+        inputs.add(inputsPtr[i]);
       }
       final outputs = <ExtismVal>[];
       for (var i = 0; i < nOutputs; i++) {
-        outputs.add(outputsPtr.elementAt(i).ref);
+        outputs.add(outputsPtr[i]);
       }
 
       // Get the host function from the registry using the function name
@@ -123,9 +121,10 @@ class HostFunction {
 
   void setNamespace(String ns) {
     if (ns.isNotEmpty) {
-      final namespace = ns.toNativeUtf8();
-      extism.extism_function_set_namespace(nativeHandle, namespace.cast());
-      calloc.free(namespace);
+      withZoneArena(() {
+        final namespace = ns.toNativeUtf8();
+        extism.extism_function_set_namespace(nativeHandle, namespace.cast());
+      });
     }
   }
 
@@ -135,14 +134,15 @@ class HostFunction {
   }
 
   void dispose() {
-    if (_nativeHandle != null) {
-      extism.extism_function_free(_nativeHandle!);
-      _nativeHandle = null;
-    }
-    if (_userDataPtr != nullptr) {
-      calloc.free(_userDataPtr);
-      userDataRegistry.remove(_userDataPtr.address);
-      _userDataPtr = nullptr;
-    }
+    withZoneArena(() {
+      if (_nativeHandle != null) {
+        extism.extism_function_free(_nativeHandle!);
+        _nativeHandle = null;
+      }
+      if (_userDataPtr != nullptr) {
+        userDataRegistry.remove(_userDataPtr.address);
+        _userDataPtr = nullptr;
+      }
+    });
   }
 }
