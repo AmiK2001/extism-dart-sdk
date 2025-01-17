@@ -1,23 +1,29 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:dart_sdk/src/extism_exception.dart';
 import 'package:dart_sdk/src/lib_extism.dart';
 import 'package:dart_sdk/src/utils.dart';
 import 'package:ffi/ffi.dart';
 
-class ExtismFFI {
-  final DynamicLibrary dynamicLibrary;
-  late final LibExtism _libExtism;
-
-  ExtismFFI({
-    required this.dynamicLibrary,
-  }) {
-    _libExtism = LibExtism(dynamicLibrary);
+String _resolveLibraryFilename() {
+  if (Platform.isWindows) {
+    return "extism.dll";
+  } else if (Platform.isMacOS | Platform.isIOS) {
+    return "libextism.dylib";
+  } else if (Platform.isLinux || Platform.isAndroid) {
+    return "libextism.so";
+  } else {
+    throw UnimplementedError("Unsupported system ${Platform.operatingSystem}");
   }
+}
 
+final extism = LibExtism(DynamicLibrary.open(_resolveLibraryFilename()));
+
+class ExtismFFI {
   /// Get the Extism version string
   String extismVersion() {
-    return _libExtism.extism_version().toDartString();
+    return extism.extism_version().toDartString();
   }
 
   /// Create a new plugin with host functions, the functions passed to this function no longer need to be manually freed using
@@ -39,7 +45,7 @@ class ExtismFFI {
         final functionsPointer = functions.toNativePointerList(allocator);
         final errmsgPointer = allocator<Pointer<Char>>();
 
-        final plugin = _libExtism.extism_plugin_new(
+        final plugin = extism.extism_plugin_new(
           wasmPointer,
           wasm.length,
           functionsPointer,
@@ -62,7 +68,7 @@ class ExtismFFI {
 
   /// Free `ExtismPlugin`
   void extismPluginFree(Pointer<ExtismPlugin> plugin) {
-    return _libExtism.extism_plugin_free(plugin);
+    return extism.extism_plugin_free(plugin);
   }
 
   /// Call a function
@@ -81,7 +87,7 @@ class ExtismFFI {
         final funcNamePointer = funcName.toNativeUtf8(allocator: allocator);
         final dataPointer = data.toNativeUint8List(allocator);
 
-        return _libExtism.extism_plugin_call(
+        return extism.extism_plugin_call(
           plugin,
           funcNamePointer.cast(),
           dataPointer,
@@ -96,20 +102,20 @@ class ExtismFFI {
   Pointer<Uint8> extismPluginOutputData(
     Pointer<ExtismPlugin> plugin,
   ) {
-    return _libExtism.extism_plugin_output_data(plugin);
+    return extism.extism_plugin_output_data(plugin);
   }
 
   /// Get the length of a plugin's output data
   int extismPluginOutputLength(
     Pointer<ExtismPlugin> plugin,
   ) {
-    return _libExtism.extism_plugin_output_length(plugin);
+    return extism.extism_plugin_output_length(plugin);
   }
 
   /// Get the error associated with a `Plugin`
   String extismPluginError(
     Pointer<ExtismPlugin> plugin,
   ) {
-    return _libExtism.extism_plugin_error(plugin).toDartString();
+    return extism.extism_plugin_error(plugin).toDartString();
   }
 }

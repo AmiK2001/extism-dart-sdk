@@ -7,20 +7,7 @@ import 'package:dart_sdk/src/lib_extism.dart';
 import 'package:dart_sdk/src/manifest/manifest_entity.dart';
 import 'package:ffi/ffi.dart';
 
-String _resolveLibraryFilename() {
-  if (Platform.isWindows) {
-    return "extism.dll";
-  } else if (Platform.isMacOS | Platform.isIOS) {
-    return "libextism.dylib";
-  } else if (Platform.isLinux || Platform.isAndroid) {
-    return "libextism.so";
-  } else {
-    throw UnimplementedError("Unsupported system ${Platform.operatingSystem}");
-  }
-}
-
 class Plugin {
-  late final DynamicLibrary _dynamicLibrary;
   late final ExtismFFI _extism;
 
   Plugin({
@@ -28,13 +15,7 @@ class Plugin {
     required ManifestEntity manifest,
     DynamicLibrary? dynamicLibrary,
   }) {
-    _dynamicLibrary = dynamicLibrary ??
-        DynamicLibrary.open(
-          _resolveLibraryFilename(),
-        );
-    _extism = ExtismFFI(
-      dynamicLibrary: _dynamicLibrary,
-    );
+    _extism = ExtismFFI();
 
     final bytes = manifest.bytes();
     _pluginPointer = _extism.extismPluginNew(_allocator, bytes, [], withWasi);
