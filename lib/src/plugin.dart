@@ -96,7 +96,7 @@ class Plugin {
           msg = errorMsgPtr.cast<Utf8>().toDartString();
         }
 
-        throw ExtismException(msg ?? "Unknown error during plugin creation");
+        throw Exception(msg ?? "Unknown error during plugin creation");
       }
 
       _cancelHandle = extism.extism_plugin_cancel_handle(_nativeHandle);
@@ -119,8 +119,7 @@ class Plugin {
           msg = errorMsgPtr.cast<Utf8>().toDartString();
         }
 
-        throw ExtismException(
-            msg ?? "Unknown error during plugin instantiation");
+        throw Exception(msg ?? "Unknown error during plugin instantiation");
       }
 
       _cancelHandle = extism.extism_plugin_cancel_handle(_nativeHandle);
@@ -169,8 +168,9 @@ class Plugin {
           msg = errorMsgPtr.cast<Utf8>().toDartString();
         }
 
-        throw ExtismException(
-            msg ?? "Unknown error during plugin creation from bytes");
+        throw Exception(
+          msg ?? "Unknown error during plugin creation from bytes",
+        );
       }
 
       _cancelHandle = extism.extism_plugin_cancel_handle(_nativeHandle);
