@@ -48,7 +48,7 @@ void main() {
     functionName: 'sum_two_numbers',
     inputTypes: [
       ExtismValType.ExtismValType_I32,
-      ExtismValType.ExtismValType_I32
+      ExtismValType.ExtismValType_I32,
     ],
     outputTypes: [ExtismValType.ExtismValType_I32],
     function: (
@@ -69,11 +69,11 @@ void main() {
   // Simulate calling 'sum_two_numbers'
   print("\nCalling sum_two_numbers (simulated)...");
   final sumInputs = allocateExtismValArray([
-    MapEntry(ExtismValType.ExtismValType_I32, 10),
-    MapEntry(ExtismValType.ExtismValType_I32, 25),
+    const MapEntry(ExtismValType.ExtismValType_I32, 10),
+    const MapEntry(ExtismValType.ExtismValType_I32, 25),
   ]);
   final sumOutputs = allocateExtismValArray([
-    MapEntry(ExtismValType.ExtismValType_I32, 0),
+    const MapEntry(ExtismValType.ExtismValType_I32, 0),
   ]);
 
   // Allocate a Pointer<ExtismCurrentPlugin> for the dummy plugin

@@ -28,9 +28,7 @@ class HostFunction {
   }
 
   Pointer<ExtismFunction> get nativeHandle {
-    if (_nativeHandle == null) {
-      _nativeHandle = _createNativeHandle();
-    }
+    _nativeHandle ??= _createNativeHandle();
     return _nativeHandle!;
   }
 

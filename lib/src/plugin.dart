@@ -1,5 +1,4 @@
 import 'dart:ffi';
-import 'dart:io';
 
 import 'package:dart_sdk/src/extism_exception.dart';
 import 'package:dart_sdk/src/extism_ffi.dart';
@@ -13,7 +12,6 @@ class Plugin {
   Plugin({
     required bool withWasi,
     required ManifestEntity manifest,
-    DynamicLibrary? dynamicLibrary,
   }) {
     _extism = ExtismFFI();
 

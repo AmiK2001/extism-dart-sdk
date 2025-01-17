@@ -83,16 +83,12 @@ extension ExtismValTypeExtension on ExtismValType {
     switch (this) {
       case ExtismValType.ExtismValType_I32:
         val.ref.v.i32 = value as int;
-        break;
       case ExtismValType.ExtismValType_I64:
         val.ref.v.i64 = value as int;
-        break;
       case ExtismValType.ExtismValType_F32:
         val.ref.v.f32 = value as double;
-        break;
       case ExtismValType.ExtismValType_F64:
         val.ref.v.f64 = value as double;
-        break;
       default:
         calloc.free(val);
         throw ArgumentError('Unsupported ExtismValType for value assignment');
