@@ -178,6 +178,7 @@ class Plugin {
   }
 
   /// Get the plugin's ID.
+  ///
   /// Returns a Uuid representing the plugin ID.
   UuidValue get id {
     _checkNotDisposed();
@@ -189,7 +190,9 @@ class Plugin {
   }
 
   /// Reset the Extism runtime.
+  ///
   /// This will invalidate all allocated memory.
+  ///
   /// Returns `true` if successful, `false` otherwise.
   bool reset() {
     _checkNotDisposed();
@@ -197,7 +200,9 @@ class Plugin {
   }
 
   /// Update plugin config values.
+  ///
   /// This will merge with the existing values.
+  ///
   /// Returns `true` if successful, `false` otherwise.
   bool updateConfig(Map<String, String> config) {
     _checkNotDisposed();
@@ -341,6 +346,7 @@ class Plugin {
   }
 
   /// Calls the provided callback function for each buffered log line.
+  ///
   /// This is only needed when `extism_log_custom` is used.
   void logDrain(LoggingSink callback) {
     _logCallback = (String message) {
@@ -353,7 +359,7 @@ class Plugin {
 }
 
 /// Set log file and level
-
+///
 /// Options for initializing a plugin.
 class PluginInitializationOptions {
   /// Enable WASI support.

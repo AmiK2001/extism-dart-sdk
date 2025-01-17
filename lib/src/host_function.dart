@@ -73,7 +73,6 @@ class HostFunction {
     }
 
     final pointer = calloc<Pointer<Void>>();
-    // ignore: invalid_use_of_protected_member
     pointer.value = Pointer.fromAddress(identityHashCode(userData));
 
     userDataRegistry[pointer.address] = userData;
@@ -102,12 +101,11 @@ class HostFunction {
         outputs.add(outputsPtr[i]);
       }
 
-      // Get the host function from the registry using the function name
       final function =
           HostFunction.functionRegistry[plugin.hostFunction?.functionName];
 
       if (function == null) {
-        print('Error: Host function not found'); // Or handle it more gracefully
+        print('Error: Host function not found');
         return 1;
       }
 
