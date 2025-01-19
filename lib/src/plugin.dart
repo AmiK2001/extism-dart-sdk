@@ -175,6 +175,11 @@ class Plugin {
     });
   }
 
+  /// Cancel plugin execution.
+  void cancel() {
+    extism.extism_plugin_cancel(_cancelHandle);
+  }
+
   /// Get the plugin's ID.
   ///
   /// Returns a Uuid representing the plugin ID.
