@@ -40,3 +40,29 @@ Pointer<ExtismVal> allocateExtismValArray(
 
   return sumInputs;
 }
+
+extension ExtismValExtension on ExtismVal {
+  num toNum() => switch (t) {
+        ExtismValType.ExtismValType_I32 => v.i32,
+        ExtismValType.ExtismValType_I64 => v.i64,
+        ExtismValType.ExtismValType_F32 => v.f32,
+        ExtismValType.ExtismValType_F64 => v.f64,
+        ExtismValType.ExtismValType_V128 => throw UnimplementedError(),
+        ExtismValType.ExtismValType_FuncRef => throw UnimplementedError(),
+        ExtismValType.ExtismValType_ExternRef => throw UnimplementedError(),
+      };
+
+  int get offset => switch (t) {
+        ExtismValType.ExtismValType_I32 => v.i32,
+        ExtismValType.ExtismValType_I64 => v.i64,
+        ExtismValType.ExtismValType_F32 => throw UnimplementedError(),
+        ExtismValType.ExtismValType_F64 => throw UnimplementedError(),
+        ExtismValType.ExtismValType_V128 => throw UnimplementedError(),
+        ExtismValType.ExtismValType_FuncRef => throw UnimplementedError(),
+        ExtismValType.ExtismValType_ExternRef => throw UnimplementedError(),
+      };
+}
+
+extension LetExtension<T> on T {
+  V let<V>(V Function(T) f) => f(this);
+}

@@ -14,10 +14,6 @@ class CurrentPlugin {
 
   CurrentPlugin(this._plugin, this._userData);
 
-  HostFunction? get hostFunction {
-    return HostFunction.userDataRegistry[_userData.address] as HostFunction?;
-  }
-
   /// Get a value from the plugin's memory by its offset.
   ///
   /// [offset] is the memory offset to read from.

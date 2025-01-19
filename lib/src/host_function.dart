@@ -4,26 +4,29 @@ import 'package:dart_sdk/src/current_plugin.dart';
 import 'package:dart_sdk/src/lib_extism.dart';
 import 'package:ffi/ffi.dart';
 
+typedef FunctionType = void Function(
+  CurrentPlugin plugin,
+  List<ExtismVal> inputs,
+  List<ExtismVal> outputs,
+);
+
 // A function provided by the host that plugins can call.
 class HostFunction {
   final String functionName;
   final List<ExtismValType> inputTypes;
   final List<ExtismValType> outputTypes;
-  final void Function(CurrentPlugin, List<ExtismVal>, List<ExtismVal>)
-      _function;
   Object? userData;
   Pointer<ExtismFunction>? _nativeHandle;
 
-  static final Map<String, Function> functionRegistry = {};
+  static final Map<String, FunctionType> functionRegistry = {};
 
   HostFunction({
     required this.functionName,
     required this.inputTypes,
     required this.outputTypes,
-    required void Function(CurrentPlugin, List<ExtismVal>, List<ExtismVal>)
-        function,
+    required FunctionType function,
     this.userData,
-  }) : _function = function {
+  }) {
     functionRegistry[functionName] = function;
   }
 
@@ -33,6 +36,40 @@ class HostFunction {
   }
 
   Pointer<ExtismFunction> _createNativeHandle() {
+    int callbackTrampoline(
+      Pointer<ExtismCurrentPlugin> pluginPtr,
+      Pointer<ExtismVal> inputsPtr,
+      int nInputs,
+      Pointer<ExtismVal> outputsPtr,
+      int nOutputs,
+      Pointer<Void> data,
+    ) {
+      try {
+        final plugin = CurrentPlugin(pluginPtr, data);
+        final inputs = <ExtismVal>[];
+        for (var i = 0; i < nInputs; i++) {
+          inputs.add(inputsPtr[i]);
+        }
+        final outputs = <ExtismVal>[];
+        for (var i = 0; i < nOutputs; i++) {
+          outputs.add(outputsPtr[i]);
+        }
+
+        final function = functionRegistry[functionName];
+
+        if (function == null) {
+          print('Error: Host function "$functionName" not found');
+          return 1;
+        }
+
+        function(plugin, inputs, outputs);
+        return 0;
+      } catch (e) {
+        print('Error in host function "$functionName" callback: $e');
+        return 1;
+      }
+    }
+
     return withZoneArena(() {
       final name = functionName.toNativeUtf8();
       final inputs = calloc<Int32>(inputTypes.length);
@@ -45,8 +82,9 @@ class HostFunction {
         outputs[i] = outputTypes[i].value;
       }
 
-      final ExtismFunctionType callback =
-          Pointer.fromFunction(callbackTrampoline);
+      final callback = NativeCallable<ExtismFunctionTypeFunction>.isolateLocal(
+        callbackTrampoline,
+      );
 
       _userDataPtr = storeUserData(userData);
 
@@ -56,7 +94,7 @@ class HostFunction {
         inputTypes.length,
         outputs.cast(),
         outputTypes.length,
-        callback,
+        callback.nativeFunction,
         _userDataPtr,
         nullptr,
       );
@@ -81,41 +119,6 @@ class HostFunction {
   }
 
   static final Map<int, Object> userDataRegistry = {};
-
-  static int callbackTrampoline(
-    Pointer<ExtismCurrentPlugin> pluginPtr,
-    Pointer<ExtismVal> inputsPtr,
-    int nInputs,
-    Pointer<ExtismVal> outputsPtr,
-    int nOutputs,
-    Pointer<Void> data,
-  ) {
-    try {
-      final plugin = CurrentPlugin(pluginPtr, data);
-      final inputs = <ExtismVal>[];
-      for (var i = 0; i < nInputs; i++) {
-        inputs.add(inputsPtr[i]);
-      }
-      final outputs = <ExtismVal>[];
-      for (var i = 0; i < nOutputs; i++) {
-        outputs.add(outputsPtr[i]);
-      }
-
-      final function =
-          HostFunction.functionRegistry[plugin.hostFunction?.functionName];
-
-      if (function == null) {
-        print('Error: Host function not found');
-        return 1;
-      }
-
-      function(plugin, inputs, outputs);
-      return 0;
-    } catch (e) {
-      print('Error in host function callback: $e');
-      return 1;
-    }
-  }
 
   void setNamespace(String ns) {
     if (ns.isNotEmpty) {
