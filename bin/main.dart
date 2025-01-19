@@ -7,7 +7,7 @@ import 'package:dart_sdk/src/host_function.dart';
 import 'package:dart_sdk/src/http_request.dart';
 import 'package:dart_sdk/src/lib_extism.dart';
 
-void countVowels() {
+Future<void> countVowels() async {
   final manifest = ManifestEntity(
     wasm: [
       WasmSource.fromPath(name: "main", path: "test/resources/code.wasm"),
@@ -27,9 +27,11 @@ void countVowels() {
   );
 
   print(output);
+
+  plugin.dispose();
 }
 
-void hostFunctions() {
+Future<void> hostFunctions() async {
   final helloWorldFunction = HostFunction(
     functionName: 'hello_world',
     inputTypes: [
@@ -83,10 +85,12 @@ void hostFunctions() {
   );
 
   print(output);
+
+  plugin.dispose();
 }
 
-void httpGet() {
-  final httpPlugin = Plugin.initWithManifest(
+Future<void> httpGet() async {
+  final plugin = Plugin.initWithManifest(
     manifest: ManifestEntity(
       allowedHosts: [
         "jsonplaceholder.typicode.com",
@@ -110,17 +114,21 @@ void httpGet() {
   );
 
   print(
-    httpPlugin.callString(
+    plugin.callString(
       "http_get",
       httpRequestJson,
     ),
   );
+
+  plugin.dispose();
 }
 
-void main() {
-  countVowels();
-  httpGet();
-  hostFunctions();
+void main() async {
+  await Future.wait<void>([
+    countVowels(),
+    hostFunctions(),
+    httpGet(),
+  ]);
 
   exit(0);
 }
