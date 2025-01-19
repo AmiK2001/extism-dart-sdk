@@ -1,7 +1,5 @@
 import 'dart:ffi';
-import 'package:dart_sdk/extism.dart';
-import 'package:dart_sdk/src/current_plugin.dart';
-import 'package:dart_sdk/src/lib_extism.dart';
+import 'package:extism/extism.dart';
 import 'package:ffi/ffi.dart';
 
 typedef FunctionType = void Function(

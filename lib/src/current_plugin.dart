@@ -2,9 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:dart_sdk/extism.dart';
-import 'package:dart_sdk/src/host_function.dart';
-import 'package:dart_sdk/src/lib_extism.dart';
+import 'package:extism/extism.dart';
 import 'package:ffi/ffi.dart';
 
 // CurrentPlugin class to manage interactions with the current plugin instance.

@@ -3,11 +3,9 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:dart_sdk/extism.dart';
-import 'package:dart_sdk/src/extism_exception.dart';
-import 'package:dart_sdk/src/host_function.dart';
-import 'package:dart_sdk/src/lib_extism.dart';
-import 'package:dart_sdk/src/log_level.dart';
+import 'package:extism/extism.dart';
+import 'package:extism/src/extism_exception.dart';
+import 'package:extism/src/log_level.dart';
 import 'package:ffi/ffi.dart';
 import 'package:uuid/uuid.dart';
 

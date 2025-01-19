@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:dart_sdk/src/manifest.dart';
-import 'package:dart_sdk/src/wasm/wasm_source.dart';
+import 'package:extism/src/manifest.dart';
+import 'package:extism/src/wasm/wasm_source.dart';
 
 ///The `Manifest` type is used to configure the runtime and specify how to load modules.
 final class ManifestEntity {

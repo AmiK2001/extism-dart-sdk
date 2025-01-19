@@ -1,6 +1,6 @@
 import 'dart:ffi';
 import 'dart:ffi' as ffi;
-import 'package:dart_sdk/src/lib_extism.dart';
+import 'package:extism/src/lib_extism.dart';
 import 'package:ffi/ffi.dart';
 
 extension ExtismValTypeExtension on ExtismValType {

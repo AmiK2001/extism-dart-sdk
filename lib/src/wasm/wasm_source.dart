@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:dart_sdk/src/manifest.dart';
+import 'package:extism/src/manifest.dart';
 
 sealed class WasmSource {
   final String name;
