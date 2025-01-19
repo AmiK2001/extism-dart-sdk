@@ -4,4 +4,8 @@
 
 # FVM Version Cache
 .fvm/
-libs/*
+
+# Extism libraries
+extism.dll
+libextism.so
+libextism.dylib
