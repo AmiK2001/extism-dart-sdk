@@ -25,23 +25,15 @@ Manifest _$ManifestFromJson(Map<String, dynamic> json) => Manifest(
           .toList(),
     );
 
-Map<String, dynamic> _$ManifestToJson(Manifest instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('allowed_hosts', instance.allowedHosts);
-  writeNotNull('allowed_paths', instance.allowedPaths);
-  writeNotNull('config', instance.config);
-  writeNotNull('memory', instance.memory?.toJson());
-  writeNotNull('timeout_ms', instance.timeoutMs);
-  writeNotNull('wasm', instance.wasm?.map((e) => e.toJson()).toList());
-  return val;
-}
+Map<String, dynamic> _$ManifestToJson(Manifest instance) => <String, dynamic>{
+      if (instance.allowedHosts case final value?) 'allowed_hosts': value,
+      if (instance.allowedPaths case final value?) 'allowed_paths': value,
+      if (instance.config case final value?) 'config': value,
+      if (instance.memory?.toJson() case final value?) 'memory': value,
+      if (instance.timeoutMs case final value?) 'timeout_ms': value,
+      if (instance.wasm?.map((e) => e.toJson()).toList() case final value?)
+        'wasm': value,
+    };
 
 MemoryOptions _$MemoryOptionsFromJson(Map<String, dynamic> json) =>
     MemoryOptions(
@@ -50,20 +42,13 @@ MemoryOptions _$MemoryOptionsFromJson(Map<String, dynamic> json) =>
       maxVarBytes: (json['max_var_bytes'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$MemoryOptionsToJson(MemoryOptions instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('max_http_response_bytes', instance.maxHttpResponseBytes);
-  writeNotNull('max_pages', instance.maxPages);
-  writeNotNull('max_var_bytes', instance.maxVarBytes);
-  return val;
-}
+Map<String, dynamic> _$MemoryOptionsToJson(MemoryOptions instance) =>
+    <String, dynamic>{
+      if (instance.maxHttpResponseBytes case final value?)
+        'max_http_response_bytes': value,
+      if (instance.maxPages case final value?) 'max_pages': value,
+      if (instance.maxVarBytes case final value?) 'max_var_bytes': value,
+    };
 
 Wasm _$WasmFromJson(Map<String, dynamic> json) => Wasm(
       hash: json['hash'] as String?,
@@ -77,24 +62,15 @@ Wasm _$WasmFromJson(Map<String, dynamic> json) => Wasm(
       url: json['url'] as String?,
     );
 
-Map<String, dynamic> _$WasmToJson(Wasm instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('hash', instance.hash);
-  writeNotNull('name', instance.name);
-  writeNotNull('path', instance.path);
-  writeNotNull('data', instance.data);
-  writeNotNull('headers', instance.headers);
-  writeNotNull('method', instance.method);
-  writeNotNull('url', instance.url);
-  return val;
-}
+Map<String, dynamic> _$WasmToJson(Wasm instance) => <String, dynamic>{
+      if (instance.hash case final value?) 'hash': value,
+      if (instance.name case final value?) 'name': value,
+      if (instance.path case final value?) 'path': value,
+      if (instance.data case final value?) 'data': value,
+      if (instance.headers case final value?) 'headers': value,
+      if (instance.method case final value?) 'method': value,
+      if (instance.url case final value?) 'url': value,
+    };
 
 DataClass _$DataClassFromJson(Map<String, dynamic> json) => DataClass(
       len: (json['len'] as num).toInt(),

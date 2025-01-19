@@ -1,33 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dart_sdk/extism.dart';
 import 'package:dart_sdk/src/current_plugin.dart';
 import 'package:dart_sdk/src/host_function.dart';
+import 'package:dart_sdk/src/http_request.dart';
 import 'package:dart_sdk/src/lib_extism.dart';
 
 void countVowels() {
-  // Host functions sample
-  final sumFunction = HostFunction(
-    functionName: 'sum_two_numbers',
-    inputTypes: [
-      ExtismValType.ExtismValType_I32,
-      ExtismValType.ExtismValType_I32,
-    ],
-    outputTypes: [ExtismValType.ExtismValType_I32],
-    function: (
-      CurrentPlugin plugin,
-      List<ExtismVal> inputs,
-      List<ExtismVal> outputs,
-    ) {
-      final a = inputs[0].v.i32;
-      final b = inputs[1].v.i32;
-      final sum = a + b;
-
-      // Set the output value
-      outputs[0].v.i32 = sum;
-    },
-  );
-
   final manifest = ManifestEntity(
     wasm: [
       WasmSource.fromPath(name: "main", path: "test/resources/code.wasm"),
@@ -37,10 +17,64 @@ void countVowels() {
   // Create plugin
   final plugin = Plugin(
     manifest,
-    [
-      sumFunction,
-    ],
+    [],
     PluginInitializationOptions(),
+  );
+
+  final output = plugin.callString(
+    "count_vowels",
+    "Hello, world",
+  );
+
+  print(output);
+}
+
+void hostFunctions() {
+  final helloWorldFunction = HostFunction(
+    functionName: 'hello_world',
+    inputTypes: [
+      ExtismValType.ExtismValType_I64,
+    ],
+    outputTypes: [
+      ExtismValType.ExtismValType_I64,
+    ],
+    function: (
+      CurrentPlugin plugin,
+      List<ExtismVal> inputs,
+      List<ExtismVal> outputs,
+    ) {
+      final input = inputs[0].offset.let(plugin.readString).let(jsonDecode);
+      final count = input['count'] as int;
+
+      print("Input: $input");
+
+      final newCount = count * 100;
+
+      final output = {'count': newCount}.let(jsonEncode);
+
+      final outputPtr = plugin.writeString(output);
+
+      print("Output: $output");
+
+      outputs[0].v.i64 = outputPtr;
+    },
+  ).withNamespace("extism:env/user");
+
+  final plugin = Plugin(
+    ManifestEntity(
+      wasm: [
+        WasmSource.fromPath(
+          name: 'main',
+          path: "test/resources/host_function.wasm",
+        ),
+      ],
+    ),
+    [
+      helloWorldFunction,
+    ],
+    PluginInitializationOptions(
+      withWasi: true,
+    ),
   );
 
   final output = plugin.callString(
@@ -55,31 +89,30 @@ void httpGet() {
   final httpPlugin = Plugin.initWithManifest(
     manifest: ManifestEntity(
       allowedHosts: [
-        "pub.dev",
+        "jsonplaceholder.typicode.com",
       ],
       wasm: [
-        WasmSource.fromUrl(
-          name: 'http',
-          url: Uri.parse(
-            "https://github.com/extism/plugins/releases/download/v1.1.1/http.wasm",
-          ),
-          hash:
-              "430edb43f087fa55b6ae489097a2dac8c332953f3f5116c45307cdcae77e2879",
+        WasmSource.fromPath(
+          name: 'main',
+          path: "test/resources/http.wasm",
         ),
       ],
     ),
     withWasi: false,
   );
 
-  final httpRequest = jsonEncode({
-    "url": "https://pub.dev/packages/uuid",
-    "method": "GET",
-  });
+  final httpRequestJson = jsonEncode(
+    HttpRequest(
+      url: "https://jsonplaceholder.typicode.com/todos/1",
+      method: "GET",
+      headers: {},
+    ),
+  );
 
   print(
     httpPlugin.callString(
       "http_get",
-      httpRequest,
+      httpRequestJson,
     ),
   );
 }
@@ -87,4 +120,7 @@ void httpGet() {
 void main() {
   countVowels();
   httpGet();
+  hostFunctions();
+
+  exit(0);
 }
