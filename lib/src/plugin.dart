@@ -19,7 +19,7 @@ DynamicLibrary _loadLibrary() {
   _dylib ??= Platform.isAndroid
       ? DynamicLibrary.open("libextism.so")
       : (Platform.isIOS || Platform.isMacOS)
-          ? DynamicLibrary.process()
+          ? DynamicLibrary.open("libextism.dylib")
           : DynamicLibrary.open("extism.dll");
   return _dylib!;
 }
@@ -312,6 +312,7 @@ class Plugin {
     if (disposing) {
       // Free up any managed resources here
     }
+
     extism.extism_plugin_free(_nativeHandle);
   }
 
